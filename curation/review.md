@@ -157,6 +157,97 @@ of being silently dropped.
 - `webauthn` **CTAP** -- Client to Authenticator Protocol is a distinct protocol (the other half of FIDO2, authenticator-to-client rather than web-origin), so rule 1 keeps it out of aliases; if enough RFC material references it, it would warrant its own tag under authentication.
 - `whip` **WHEP** -- WebRTC-HTTP Egress Protocol, the playback counterpart from the same WISH WG. It is a different technology from ingestion, so it is not an alias of whip; if it has enough document coverage it deserves its own sibling tag under webrtc.
 
+## Proposed by a previous pass, not re-proposed -- 82
+
+A model pass is not deterministic, so a re-run explores a different
+subset rather than reproducing the last one. These were proposed before
+and are absent now. They are not rejections -- nothing judged them -- so
+read them as candidates, deciding for each whether it is an alias, a
+covers entry, or neither.
+
+- `amateur-radio` **AX25**
+- `atom` **atompub**
+- `base64` **Radix-64**
+- `base64` **base64url**
+- `bgp` **BGP-4**
+- `captive-portal` **CAPPORT**
+- `capwap` **LWAPP**
+- `compression` **LZ77**
+- `compression` **zlib**
+- `conferencing` **videoconferencing**
+- `congestion-control` **TFRC**
+- `dvb` **MPEG2**
+- `dvb` **ipdvb**
+- `emergency-services` **eCall**
+- `est` **EST-coaps**
+- `fax` **IFAX**
+- `federated-authentication` **SSO**
+- `federated-authentication` **VoT**
+- `firewire` **IEEE1394**
+- `gmpls` **CCAMP**
+- `gssapi` **GSS-API**
+- `header-compression` **ECRTP**
+- `header-compression` **cRTP**
+- `hems` **HEMP**
+- `http` **HTTPbis**
+- `ike` **Photuris**
+- `internationalization` **internationalisation**
+- `intrusion-detection` **IDWG**
+- `ipp` **IPPS**
+- `ipr` **patent**
+- `ipv6-transition` **NGTRANS**
+- `ipv6-transition` **SIIT**
+- `jose` **JWA**
+- `json` **I-JSON**
+- `l3vpn` **2547**
+- `ldap` **ldaps**
+- `ldp` **CR-LDP**
+- `link-layer` **datalink**
+- `lpd` **lpr**
+- `mailing-lists` **MLM**
+- `matroska` **EBML**
+- `message-format` **RFC2822**
+- `message-format` **RFC5322**
+- `multicast` **multicasting**
+- `nat-traversal` **NAT-T**
+- `network-graphics` **NGP**
+- `nhrp` **NARP**
+- `oblivious-http` **OHAI**
+- `p2p` **peer-to-peer**
+- `pake` **J-PAKE**
+- `pcp` **NAT-PMP**
+- `pim` **BIDIR-PIM**
+- `pim` **PIM-BIDIR**
+- `pim` **PIM-DM**
+- `pim` **PIM-SM**
+- `post-quantum` **pquip**
+- `pseudowire` **PW**
+- `ptp` **IEEE1588**
+- `randomness` **DRBG**
+- `rdma` **RDDP**
+- `route-reflection` **reflector**
+- `rtp` **AVT**
+- `senml` **SensML**
+- `sha` **SHA-512**
+- `sha` **SHA1**
+- `sha` **SHA256**
+- `srtp` **MIKEY**
+- `ssh` **OpenSSH**
+- `sustainability` **sustainable**
+- `teep` **TEE**
+- `time-zones` **TZDIST**
+- `udp-lite` **UDPLite**
+- `unicode` **ISO-10646**
+- `utf-8` **utf8**
+- `vehicular-networking` **ITS**
+- `vehicular-networking` **VANET**
+- `whois` **nicname**
+- `whois` **rwhois**
+- `whois` **whois++**
+- `x509` **X.509v3**
+- `xml-signatures` **xmldsig**
+- `yang` **YIN**
+
 ## Notes -- 542
 
 - `464xlat` -- 464XLAT has exactly one name; the tag id itself is what a reader would type. CLAT and PLAT (the customer-side and provider-side translators) are the obvious candidates but are components of the architecture, not other names for it, so rule 2 excludes them; a reader typing CLAT is better served by full-text search. NAT64/DNS64 and the stateless translation algorithm are separate technologies with their own tags (nat64, dns64), so they belong to neither list here. Note that the desc word 'ipv4/ipv6' is indexed whole, so typing 'ipv6' does not reach this tag via the desc — but ipv6 is itself a tag id (rule 5) and the parent chain already covers that reader.

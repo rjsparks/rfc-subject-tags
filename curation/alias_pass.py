@@ -439,7 +439,7 @@ def ask(client, system_blocks, tag_text, effort):
 
 # ---------------------------------------------------------------- outputs
 
-def write_outputs(results, corpus, by_id, out_dir, min_hits, min_precision=20):
+def write_outputs(results, corpus, by_id, out_dir, min_hits, min_precision=20, previous=None):
     ids = set(by_id)
     claimed = defaultdict(list)
     for r in results.values():
@@ -533,6 +533,30 @@ def write_outputs(results, corpus, by_id, out_dir, min_hits, min_precision=20):
         for tid, term, why in sorted(missing, key=lambda r: r[0]):
             f.write(f"- `{tid}` **{term}** -- {why}\n")
 
+        # A model pass is not deterministic: re-running finds a different subset,
+        # not the same one. Terms an earlier pass proposed and this one did not
+        # are listed here rather than lost, which is what makes repeated passes
+        # accumulate instead of churn. Feed the prior aliases.yaml with
+        # --previous; git has every committed one.
+        if previous:
+            now = {(t, a) for t, v in list(kept.items()) for a, *_ in v}
+            now |= {(t, a) for t, v in list(covers.items()) for a, *_ in v}
+            prev = yaml.safe_load(open(previous)) or {}
+            gone = sorted(
+                (t, a)
+                for t, v in prev.items()
+                for a in ((v.get("aliases") or []) + (v.get("covers") or []))
+                if (t, a) not in now
+            )
+            f.write(f"\n## Proposed by a previous pass, not re-proposed -- {len(gone)}\n\n")
+            f.write("A model pass is not deterministic, so a re-run explores a different\n")
+            f.write("subset rather than reproducing the last one. These were proposed before\n")
+            f.write("and are absent now. They are not rejections -- nothing judged them -- so\n")
+            f.write("read them as candidates, deciding for each whether it is an alias, a\n")
+            f.write("covers entry, or neither.\n\n")
+            for t, a in gone:
+                f.write(f"- `{t}` **{a}**\n")
+
         notes = [(t, results[t]["notes"]) for t in sorted(results) if results[t].get("notes", "").strip()]
         f.write(f"\n## Notes -- {len(notes)}\n\n")
         for tid, note in notes:
@@ -569,6 +593,10 @@ def main():
                         "cost only what is still missing")
     p.add_argument("--retry-wait", type=int, default=900,
                    help="seconds to wait between retry rounds (default 15 min)")
+    p.add_argument("--previous", metavar="ALIASES_YAML",
+                   help="a prior aliases.yaml; terms it proposed that this pass did not are "
+                        "listed in review.md instead of being lost. Use on every re-run: "
+                        "`git show HEAD:curation/aliases.yaml > prev.yaml`")
     p.add_argument("--dry-run", action="store_true", help="render prompts, make no API calls")
     p.add_argument("--report", action="store_true", help="rebuild outputs from results.jsonl only")
     args = p.parse_args()
@@ -591,7 +619,7 @@ def main():
                 done[r["id"]] = r
 
     if args.report:
-        kept, cov, rej, miss, coll = write_outputs(done, corpus, by_id, out_dir, args.min_hits, args.min_precision)
+        kept, cov, rej, miss, coll = write_outputs(done, corpus, by_id, out_dir, args.min_hits, args.min_precision, args.previous)
         print(f"rebuilt from {len(done)} results: {sum(len(v) for v in kept.values())} aliases, "
               f"{sum(len(v) for v in cov.values())} covers, {len(rej)} rejected, "
               f"{len(miss)} missing-tag candidates, {len(coll)} collisions")
@@ -685,7 +713,7 @@ def main():
         for t in failures:
             print(f"  {t['id']}", file=sys.stderr)
 
-    kept, cov, rej, miss, coll = write_outputs(done, corpus, by_id, out_dir, args.min_hits, args.min_precision)
+    kept, cov, rej, miss, coll = write_outputs(done, corpus, by_id, out_dir, args.min_hits, args.min_precision, args.previous)
     print(f"\ntokens: {totals['in']} in ({totals['cache_read']} cached), {totals['out']} out"
           + (f" | ~${totals['cost_milli']/1000:.2f} equivalent" if totals.get("cost_milli") else ""))
     print(f"aliases {sum(len(v) for v in kept.values())} across {len(kept)} tags | "

@@ -54,7 +54,30 @@ installed; set `CLAUDE_CLI` to override the path.
 
 `results.jsonl` is also the resume file. Re-running skips tags already in it, so
 an interrupted pass costs nothing to restart, and changing the prompt means
-deleting only the affected rows rather than re-running the vocabulary.
+deleting only the affected rows rather than re-running the vocabulary. Keeping
+it tracked is also what makes a grounding change free: the two re-grounds that
+set the precision threshold cost nothing, because the responses were on disk.
+
+### Re-running the pass
+
+**A model pass is not deterministic.** A re-run explores a different subset
+rather than reproducing the last one — the run that introduced `covers` found
+581 entries against the previous 485, but 85 terms the earlier pass had
+proposed were simply absent, among them `BGP-4`, `zlib`, `Radix-64`, `CAPPORT`
+and `LWAPP`. Nothing judged them; that pass just went a different way.
+
+So compare against the last output on every re-run:
+
+```sh
+git show HEAD:curation/aliases.yaml > /tmp/prev.yaml
+python3 alias_pass.py --previous /tmp/prev.yaml ...
+```
+
+Terms the previous pass proposed and this one did not are listed in `review.md`
+under *Proposed by a previous pass, not re-proposed*, to be read as candidates
+rather than rejections. This is what makes repeated passes accumulate instead of
+churn, and it is why only one `results.jsonl` is kept: the useful artefact is
+the difference between passes, not a pile of old ones.
 
 ### Grounding: full text and precision
 
