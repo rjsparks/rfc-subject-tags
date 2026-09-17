@@ -53,11 +53,19 @@ jobs:
       - name: Regenerate artifacts
         run: python3 regen.py
 
+      # Acronyms that appeared in an RFC title beside their expansion and that no
+      # reader can currently reach by searching the tag they belong to. Costs
+      # nothing (no model, no network) and commits nothing: the list is published
+      # beside the other artifacts for a curator to read. Candidates only -- see
+      # code.md for what they are and are not.
+      - name: Collect alias candidates
+        run: python3 alias_candidates.py --out alias-candidates.json
+
       - name: Stage site
         run: |
           mkdir -p _site
           cp rfc-tags.html _site/index.html
-          cp rfc-tags.json rfc-tags.csv rfcs.json _site/
+          cp rfc-tags.json rfc-tags.csv rfcs.json alias-candidates.json _site/
 
       # On a pull request, build only: Pages serves one live site, so a PR must not
       # deploy over it. The staged site is attached to the run instead — download it

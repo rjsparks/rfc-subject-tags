@@ -8,7 +8,7 @@ How the tag system is built: the input corpus, the taxonomy file, the engine tha
 
 | File | Contains |
 |---|---|
-| `taxonomy.yaml` | Every tag with its parent, kind, description, match rules, working groups, suppression, decomposition and implied topics; plus engine parameters. Each entry also carries a generated `stats` block (see below) that `regen.py` rewrites and curators do not edit |
+| `taxonomy.yaml` | Every tag with its parent, kind, description, optional `aliases` and `covers` (both searched, never displayed as the tag's name), match rules, working groups, suppression, decomposition and implied topics; plus engine parameters. Each entry also carries a generated `stats` block (see below) that `regen.py` rewrites and curators do not edit |
 
 ### Code
 
@@ -19,6 +19,7 @@ How the tag system is built: the input corpus, the taxonomy file, the engine tha
 | `make_corpus_from_local.py` | Builds `rfcs.json` from a directory of per-RFC metadata files instead |
 | `regen.py` | Regenerates the generated files, writes the `stats` blocks into `taxonomy.yaml`, and refreshes the figures in validation.md and README.md and the generated blocks in this file |
 | `browser_template.html` | The review page (five views: Vocabulary, Co-occurrence, Lifespan, Overlap, All RFCs) with its data removed; `regen.py` embeds the current data to produce `rfc-tags.html`. Fonts are embedded so the page works offline |
+| `alias_candidates.py` | Collects acronyms that appear in an RFC title beside their expansion and that no reader can reach by searching the tag they belong to. Runs in CI after `regen.py`; calls no model and needs no network |
 
 ### Generated (never edit by hand)
 
@@ -31,6 +32,7 @@ them in the working directory, and CI publishes the current build to GitHub Page
 | `rfc-tags.json` | <https://rfc-editor.github.io/rfc-subject-tags/rfc-tags.json> |
 | `rfc-tags.csv` | <https://rfc-editor.github.io/rfc-subject-tags/rfc-tags.csv> |
 | `rfcs.json` | <https://rfc-editor.github.io/rfc-subject-tags/rfcs.json> |
+| `alias-candidates.json` | <https://rfc-editor.github.io/rfc-subject-tags/alias-candidates.json> |
 
 The build runs daily, so the published page tracks the current corpus. The figures committed in
 README.md and validation.md describe the last curation run instead, and drift from it as RFCs
@@ -41,6 +43,7 @@ publish; the page carries its own build date so the two can be told apart.
 | `rfcs.json` | Corpus metadata, one record per RFC — the engine's input, produced by either corpus script. Fetched fresh at build time; the snapshot each build used is published alongside the other artifacts, so a published build can be reproduced exactly |
 | `rfc-tags.json` | Per RFC: title, year, leaf `tags`, full `paths` (R4), and `technology` / `topic` coordinates for the served view |
 | `rfc-tags.csv` | The same table for spreadsheet use; list fields are `;`-separated, paths `|`-separated |
+| `alias-candidates.json` | Alias candidates harvested from RFC titles, most-seen first. A curator reads it; nothing consumes it |
 | `rfc-tags.html` | Self-contained review page. **Vocabulary**: the tree with corpus count and notifications-per-year (since 2021) per tag, search, technology/topic filter, multi-select with AND/OR and the matching RFCs. **Co-occurrence**: tag pairs sharing RFCs. **Lifespan**: each tag's first-to-last year, live or dormant. **Overlap**: Jaccard and one-way overlap flags for redundant or nested pairs. **All RFCs**: look-up with tags and served technology/topic coordinates |
 
 ### To reproduce
@@ -242,3 +245,40 @@ The `implies` field is consulted over the ancestor closure, so `dkim` inherits `
 `regen.py` computes each tag's `stats` block and writes it back into `taxonomy.yaml`; renders `rfc-tags.csv`; builds `rfc-tags.html` by embedding into `browser_template.html` the tags (with `stats`, notification rate and lifetime), every RFC's row (leaf tags and served coordinates), and tag co-occurrence pairs; and refreshes the figures in validation.md and README.md. Run it after `engine.py`, after any change to the YAML.
 
 Everything is read and written in the working directory. Three tracked files are rewritten **in place** — `taxonomy.yaml` (its `stats` blocks), `README.md` and `validation.md` (their figures) — so run it on a clean working tree and review the resulting diff as part of the change. The figures move whenever the corpus does: a run against an index one RFC newer than the last shifted two lines of validation.md and 24 lines of `stats`.
+
+## Aliases and covers
+
+Two optional lists on a tag, both searched, neither shown as the tag's name.
+`aliases` are other names for the same thing — SNTP for `ntp`, SSL for `tls`.
+`covers` are different things the tag stands in for because nothing more
+specific exists — `cellular` covers LTE and 5G. See R21 and R22 in README.md.
+
+Three pieces must agree or the fields do nothing: `taxonomy.yaml` carries the
+terms, `regen.py` passes them into the page's tag data, and
+`browser_template.html` indexes them. An exact alias hit scores 70 and a
+`covers` hit 55, both above a description word and below the tag's own id.
+`engine.Taxonomy` rejects an entry equal to a tag id and reports one claimed by
+two tags without failing — `pkix` legitimately belongs to both `pki` and `x509`.
+
+## Alias candidates
+
+`alias_candidates.py` runs in CI and publishes `alias-candidates.json`. RFC
+titles spell out an expansion on first use — "Simple Network Time Protocol
+(SNTP)" — which is where variant names live. The script pairs each parenthesised
+acronym with the expansion beside it, attributes it to the most specific tag
+whose own `match` rules fire on that expansion, and drops anything a reader
+could already reach by searching that tag, including its existing `aliases`.
+
+Attribution by expansion is what makes the output usable. Without it every tag
+on the RFC looks equally plausible and the list is dominated by co-occurrence —
+`EPP` proposed for `rdap` *and* `RDAP` for `epp` — running to roughly 4,000
+pairs instead of a few hundred.
+
+**These are candidates, not findings.** Roughly half are not aliases: a
+component (`LSP` under `mpls`), a different technology (`BGP-LS` under `bgp`),
+or a term whose real home is a more specific tag. Yield is small and steady —
+about 200 RFCs a year, roughly 115 carrying a parenthesised acronym, most
+already reachable — so expect a short list to review every few months.
+
+Nothing notifies anyone when it changes. CI commits nothing and no bot has
+write access, both deliberate, so the list is published and a curator looks.

@@ -99,6 +99,13 @@ For each topic-implying technology, list assignments with no title evidence and 
 
 By inspection of the tree: no tag names an IETF area, a status, a stream or a date.
 
+### Aliases and covers (R21, R22)
+
+- **Structural.** `engine.Taxonomy` fails if any `aliases` or `covers` entry equals a tag id; a term claimed by more than one tag is reported, not failed — `sftp` legitimately belongs to both `ftp` and `ssh`.
+- **Grounding.** Every entry is used as that name in RFC text. `curation/alias_pass.py` measures this against the full-text corpus: `raw` documents containing the term, `ctx` of those the tag's own `match` rules also fire on, and the precision `ctx/raw`. Entries below the precision floor are held for review rather than merged.
+- **Precision is a noise filter, not a semantic check.** It measures topical co-occurrence, so it catches `disruption` under `dtn` (2%) but not `sftp` under `ftp` (100%) — documents about SFTP genuinely discuss FTP. Whether a term names *this* technology or a neighbouring one stays a reading judgement.
+- **Aliases against covers.** Confirm each `aliases` entry denotes the same thing the tag denotes, and each `covers` entry denotes something else the tag stands in for. A `covers` entry whose subject has acquired its own tag must move out.
+
 ### Engine round-trip
 
 When the engine or the YAML schema changes, re-run against the previous `rfc-tags.json` and list every RFC whose `tags` differ. Differences must be explainable — at the YAML-to-engine migration nine RFCs differed, all in which tags survive the seven-tag cap or the three-tag abstract fallback, and none in tags matched.

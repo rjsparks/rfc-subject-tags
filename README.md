@@ -93,6 +93,11 @@ Each requirement has an identifier, R1–R20. The validation procedure in valida
 - **R19** A topic records what a document is *about*, not what properties its subject *has*.
 - **R20** A technology implies a topic only when that topic is the technology's purpose, never merely a feature. TLS implies security, ROHC implies compression, PIM implies multicast, QUIC implies transport. QUIC does not imply security although it mandates encryption; HTTP does not imply compression although it supports it.
 
+### Finding a tag
+
+- **R21** A tag may carry `aliases` — other names for the same thing, searched but never displayed. An alias denotes what the tag denotes: a superseded name (SSL for `tls`), a version or variant form (SNTP for `ntp`, IKEv2 for `ike`), a common abbreviation (i18n for `internationalization`), or an informal name (Bonjour for `service-discovery`). A term naming a *different* technology is not an alias however close, because a wrong alias returns a confidently wrong result where full-text search would have served the reader correctly. Every alias must be used as that name in RFC text.
+- **R22** A tag may carry `covers` — names of things the tag stands in for because no more specific tag exists. `cellular` covers LTE and 5G. Unlike an alias, a `covers` entry names something else, so it is honest to display as the tag's scope, and it is the standing list of candidates for R10 review. When a covered term earns its own tag, it moves out of `covers`.
+
 ## Search and subscription semantics
 
 ### What a tag matches
