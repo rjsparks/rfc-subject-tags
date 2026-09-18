@@ -42,17 +42,16 @@ class Taxonomy:
         ids = [t['id'] for t in self.tags]
         dup = [i for i, c in collections.Counter(ids).items() if c > 1]
         assert not dup, f'duplicate tag ids: {dup}'
-        # aliases and covers are searched, never displayed. An entry equal to a
-        # tag id would shadow that tag, so it is fatal. A term claimed by two
-        # tags is legitimate (sftp belongs to both ftp and ssh) and only warns.
+        # aliases are searched, never displayed. One equal to a tag id would
+        # shadow that tag, so it is fatal. A term claimed by two tags is
+        # legitimate (pkix belongs to both pki and x509) and only warns.
         claims = collections.defaultdict(list)
         for e in self.tags:
-            for field in ('aliases', 'covers'):
-                for a in e.get(field) or []:
-                    key = str(a).strip().lower()
-                    assert key.replace(' ', '-') not in set(ids) - {e['id']}, \
-                        f'{e["id"]}: {field} entry {a!r} shadows an existing tag id'
-                    claims[key].append(e['id'])
+            for a in e.get('aliases') or []:
+                key = str(a).strip().lower()
+                assert key.replace(' ', '-') not in set(ids) - {e['id']}, \
+                    f'{e["id"]}: alias {a!r} shadows an existing tag id'
+                claims[key].append(e['id'])
         for term, owners in sorted(claims.items()):
             if len(owners) > 1:
                 print(f'note: {term!r} is claimed by {", ".join(sorted(owners))}', file=sys.stderr)

@@ -8,7 +8,7 @@ How the tag system is built: the input corpus, the taxonomy file, the engine tha
 
 | File | Contains |
 |---|---|
-| `taxonomy.yaml` | Every tag with its parent, kind, description, optional `aliases` and `covers` (both searched, never displayed as the tag's name), match rules, working groups, suppression, decomposition and implied topics; plus engine parameters. Each entry also carries a generated `stats` block (see below) that `regen.py` rewrites and curators do not edit |
+| `taxonomy.yaml` | Every tag with its parent, kind, description, optional `aliases` (searched, never displayed), match rules, working groups, suppression, decomposition and implied topics; plus engine parameters. Each entry also carries a generated `stats` block (see below) that `regen.py` rewrites and curators do not edit |
 
 ### Code
 
@@ -81,7 +81,7 @@ One record per published RFC:
 
 ### Sources
 
-- The rfc-editor.org index (`rfc-index.xml`), parsed to `rfcs.json` by `make_corpus_from_index.py`. <!-- generated:coverage -->Coverage: 9,835 RFCs; 7,243 with a working group; 7,428 with keywords; 9,128 with abstracts.<!-- /generated -->
+- The rfc-editor.org index (`rfc-index.xml`), parsed to `rfcs.json` by `make_corpus_from_index.py`. <!-- generated:coverage -->Coverage: 9,836 RFCs; 7,244 with a working group; 7,429 with keywords; 9,129 with abstracts.<!-- /generated -->
 - A local directory of per-RFC `.json` files, via `make_corpus_from_local.py`. It expects one file per RFC, named `rfcNNNN.json`; the script defaults to `~/Data/RFCs` and takes the directory as its first argument. Field names vary between sources, so the script's `FIELD_MAP` is configurable — for example, the producing group may be under `source` rather than `wg`.
 
 ### The `day` assumption
@@ -246,19 +246,19 @@ The `implies` field is consulted over the ancestor closure, so `dkim` inherits `
 
 Everything is read and written in the working directory. Three tracked files are rewritten **in place** — `taxonomy.yaml` (its `stats` blocks), `README.md` and `validation.md` (their figures) — so run it on a clean working tree and review the resulting diff as part of the change. The figures move whenever the corpus does: a run against an index one RFC newer than the last shifted two lines of validation.md and 24 lines of `stats`.
 
-## Aliases and covers
+## Aliases
 
-Two optional lists on a tag, both searched, neither shown as the tag's name.
-`aliases` are other names for the same thing — SNTP for `ntp`, SSL for `tls`.
-`covers` are different things the tag stands in for because nothing more
-specific exists — `cellular` covers LTE and 5G. See R21 and R22 in README.md.
+An optional list on a tag, searched but never shown as the tag's name — SNTP for
+`ntp`, SSL for `tls`, GUID for `uuid`. An alias names the same thing the tag
+names; a term naming a distinct technology with RFCs of its own belongs in the
+tree as a child tag instead. See R21 in README.md.
 
-Three pieces must agree or the fields do nothing: `taxonomy.yaml` carries the
+Three pieces must agree or the field does nothing: `taxonomy.yaml` carries the
 terms, `regen.py` passes them into the page's tag data, and
-`browser_template.html` indexes them. An exact alias hit scores 70 and a
-`covers` hit 55, both above a description word and below the tag's own id.
-`engine.Taxonomy` rejects an entry equal to a tag id and reports one claimed by
-two tags without failing — `pkix` legitimately belongs to both `pki` and `x509`.
+`browser_template.html` indexes them, an exact alias hit scoring 70 — above a
+description word, below the tag's own id. `engine.Taxonomy` rejects an alias
+equal to a tag id and reports one claimed by two tags without failing, since
+`pkix` legitimately belongs to both `pki` and `x509`.
 
 ## Alias candidates
 

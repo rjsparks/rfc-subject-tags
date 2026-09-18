@@ -370,7 +370,7 @@ footer code{font-size:12px}
           <p><span class="k-topic">Topics</span> are subjects and cross-cutting
             aspects, set in violet in the text face; <span class="k-tech">technologies</span>
             are named protocols, systems and formats, set in the RFC series' own typewriter face.
-            Roots are always topics. Search matches tag names, aliases, covers and descriptions on whole words. An alias is another name for the tag; covers names something the tag stands in for because no more specific tag exists.
+            Roots are always topics. Search matches tag names, aliases and descriptions on whole words.
             Two measures, kept apart: <b>Corpus</b> is how many RFCs carry a tag; <b>mail/yr</b>
             is how many notifications a subscriber would have received per year since January
             2021. When they disagree, the disagreement is the finding.</p>
@@ -596,7 +596,7 @@ function words(s){return String(s||'').toLowerCase().split(/[^a-z0-9.+#/]+/).fil
 function subs(s){return String(s||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);}
 function lc(a){return (a||[]).map(function(x){return String(x).toLowerCase();});}
 function searchIndex(t){return {id:t.id.toLowerCase(),idSubs:subs(t.id),descWords:words(t.desc),
-  aliases:lc(t.aliases),covers:lc(t.covers)};}
+  aliases:lc(t.aliases)};}
 function scoreTag(ix,q){
   var best=0,why=null,k;
   if(ix.id===q)return {score:100,why:null};
@@ -609,15 +609,11 @@ function scoreTag(ix,q){
     if(ix.aliases[k]===q){if(best<70){best=70;why=ix.aliases[k];}break;}
     if(ix.aliases[k].indexOf(q)===0&&best<40){best=40;why=ix.aliases[k];}
   }
-  for(k=0;k<ix.covers.length;k++){
-    if(ix.covers[k]===q){if(best<55){best=55;why='covers '+ix.covers[k];}break;}
-    if(ix.covers[k].indexOf(q)===0&&best<35){best=35;why='covers '+ix.covers[k];}
-  }
   for(k=0;k<ix.descWords.length;k++){
     if(ix.descWords[k]===q){if(best<30){best=30;why=ix.descWords[k];}break;}
     if(ix.descWords[k].indexOf(q)===0&&best<20){best=20;why=ix.descWords[k];}
   }
-  return {score:best,why:(best<45||best===70||best===55)?why:null};
+  return {score:best,why:(best<45||best===70)?why:null};
 }
 function searchTags(tags,query){
   var q=String(query||'').trim().toLowerCase();

@@ -38,7 +38,7 @@ There are two coordinated representations of the same tags.
 
 **The served view** is derived from the tree mechanically and is what search and subscriptions run on. It separates the tags into two axes:
 
-- **technology** — 461 tags, keeping the hierarchy;
+- **technology** — 548 tags, keeping the hierarchy;
 - **topic** — 75 tags, flat: the root subjects plus cross-cutting aspects such as `privacy`, `multicast` and `ip-mobility`.
 
 A document's topics are the roots of its paths plus any aspect tags it carries, plus the topics its technologies *imply*: TLS implies security, PIM implies multicast, QUIC implies transport. This is what lets "quic AND security" find RFC 9001 without anyone having coined a tag for the intersection.
@@ -96,7 +96,6 @@ Each requirement has an identifier, R1–R20. The validation procedure in valida
 ### Finding a tag
 
 - **R21** A tag may carry `aliases` — other names for the same thing, searched but never displayed. An alias denotes what the tag denotes: a superseded name (SSL for `tls`), a version or variant form (SNTP for `ntp`, IKEv2 for `ike`), a common abbreviation (i18n for `internationalization`), or an informal name (Bonjour for `service-discovery`). A term naming a *different* technology is not an alias however close, because a wrong alias returns a confidently wrong result where full-text search would have served the reader correctly. Every alias must be used as that name in RFC text.
-- **R22** A tag may carry `covers` — names of things the tag stands in for because no more specific tag exists. `cellular` covers LTE and 5G. Unlike an alias, a `covers` entry names something else, so it is honest to display as the tag's scope, and it is the standing list of candidates for R10 review. When a covered term earns its own tag, it moves out of `covers`.
 
 ## Search and subscription semantics
 
@@ -147,7 +146,7 @@ Broad topics are legitimate subscription targets even though they are busy, beca
 - `routing` about 56,
 - `network-management` about 33.
 
-Dormant tags are equally legitimate: 205 of the 542 tags have had no RFC since 2021. A subscription to one is a standing request to be told if the technology revives.
+Dormant tags are equally legitimate: 269 of the 629 tags have had no RFC since 2021. A subscription to one is a standing request to be told if the technology revives.
 
 ## What the taxonomy looks like
 
@@ -155,9 +154,9 @@ The taxonomy is `taxonomy.yaml` — one entry per tag with its place in the tree
 
 ### Size and shape
 
-- 542 tags: 18 roots, 266 at level 2, 233 at level 3, 25 at level 4.
-- 461 technologies and 81 topics in the tree (75 topics reach the served view; six composite topics decompose into their parts).
-- Mean 3.63 tags per RFC including ancestors; no RFC untagged; no tag unused.
+- 629 tags: 18 roots, 270 at level 2, 280 at level 3, 61 at level 4.
+- 548 technologies and 81 topics in the tree (75 topics reach the served view; six composite topics decompose into their parts).
+- Mean 3.69 tags per RFC including ancestors; no RFC untagged; no tag unused.
 
 ### The roots
 

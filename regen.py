@@ -57,7 +57,7 @@ tag_index={t:i for i,t in enumerate(tax.order)}
 tags_data=[]
 for e in doc['tags']:
     t=e['id']; st=e['stats']; n21=sum(1 for k in docs[t] if (byid[k]['year'] or 0)>=W0)
-    tags_data.append({'id':t,'root':tax.root[t],'d':len(tax.path[t])-1,'parent':e.get('parent'),'path':'/'.join(tax.path[t]),'desc':e['desc'],'kind':e['kind'],'aliases':e.get('aliases') or [],'covers':e.get('covers') or [],
+    tags_data.append({'id':t,'root':tax.root[t],'d':len(tax.path[t])-1,'parent':e.get('parent'),'path':'/'.join(tax.path[t]),'desc':e['desc'],'kind':e['kind'],'aliases':e.get('aliases') or [],
         'direct':st['direct'],'total':st['total'],'rate':round(n21/window_years,1),'first':st['first_year'],'last':st['last_year'],'n21':n21,'maxYear':e.get('max_year')})
 rows=[]
 for k in sorted(RT, key=lambda x:int(x[3:])):

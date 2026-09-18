@@ -99,12 +99,12 @@ For each topic-implying technology, list assignments with no title evidence and 
 
 By inspection of the tree: no tag names an IETF area, a status, a stream or a date.
 
-### Aliases and covers (R21, R22)
+### Aliases (R21)
 
-- **Structural.** `engine.Taxonomy` fails if any `aliases` or `covers` entry equals a tag id; a term claimed by more than one tag is reported, not failed — `sftp` legitimately belongs to both `ftp` and `ssh`.
-- **Grounding.** Every entry is used as that name in RFC text. `curation/alias_pass.py` measures this against the full-text corpus: `raw` documents containing the term, `ctx` of those the tag's own `match` rules also fire on, and the precision `ctx/raw`. Entries below the precision floor are held for review rather than merged.
+- **Structural.** `engine.Taxonomy` fails if any `aliases` entry equals a tag id; a term claimed by more than one tag is reported, not failed — `pkix` legitimately belongs to both `pki` and `x509`.
+- **Grounding.** Every alias is used as that name in RFC text. `curation/alias_pass.py` measures this against the full-text corpus: `raw` documents containing the term, `ctx` of those the tag's own `match` rules also fire on, and the precision `ctx/raw`. Entries below the precision floor are held for review rather than merged.
 - **Precision is a noise filter, not a semantic check.** It measures topical co-occurrence, so it catches `disruption` under `dtn` (2%) but not `sftp` under `ftp` (100%) — documents about SFTP genuinely discuss FTP. Whether a term names *this* technology or a neighbouring one stays a reading judgement.
-- **Aliases against covers.** Confirm each `aliases` entry denotes the same thing the tag denotes, and each `covers` entry denotes something else the tag stands in for. A `covers` entry whose subject has acquired its own tag must move out.
+- **Alias against tag.** An alias names the same thing the tag names. A term that names a *distinct* technology with an RFC of its own belongs in the tree as a child tag instead, by R10 and R11's evidence test; `curation/promote_pass.py` makes that call and `curation/apply_promotions.py` refuses a tag whose proposed `match` rule tags no document.
 
 ### Engine round-trip
 
@@ -118,22 +118,22 @@ When the engine or the YAML schema changes, re-run against the previous `rfc-tag
 
 ### Curated tree
 
-- **Tags:** 542 — 18 roots, 266 at level 2, 233 at level 3, 25 at level 4; 461 technology, 81 topic.
+- **Tags:** 629 — 18 roots, 270 at level 2, 280 at level 3, 61 at level 4; 548 technology, 81 topic.
 - **Coverage:** 0 untagged.
-- **Tags per RFC (with ancestors):** mean 3.63, median 3, max 16.
-- **Distribution:** 1:642 · 2:2,611 · 3:2,181 · 4:1,587 · 5:1,352 · 6:699 · 7:389 · 8:207 · 9:93 · 10:36 · 11:22 · 12:8 · 13:4 · 14:3 · 16:1.
-- **Over ten tags:** 38 documents (0.4%), all multi-technology cross-area specifications.
+- **Tags per RFC (with ancestors):** mean 3.69, median 3, max 15.
+- **Distribution:** 1:640 · 2:2,545 · 3:2,148 · 4:1,599 · 5:1,334 · 6:737 · 7:429 · 8:216 · 9:102 · 10:43 · 11:23 · 12:12 · 13:4 · 14:3 · 15:1.
+- **Over ten tags:** 43 documents (0.4%), all multi-technology cross-area specifications.
 - **Unused tags:** 0.
-- **Single-document tags:** 22 — amateur-radio, arc, data-center-networking, ebpf, eigrp, ffv1, http-caching, irtp, lpwan, mospf, oblivious-dns, ovsdb, password-hashing, ratp, sdf, sframe, teep, tmux, tvr, whip, xacml, y2k.
+- **Single-document tags:** 41 — amateur-radio, arc, bats, blake2, crc, data-center-networking, dctcp, dragonfly, ebpf, eigrp, ffv1, gsakmp, hoba, http-caching, irtp, jpake, jscalendar, lpwan, mospf, nat-pmp, oblivious-dns, opaque, ovsdb, password-hashing, pgm, ratp, rbnf, scrypt, sdf, sframe, speex, tbrpf, teep, tetrys, tmux, tvr, vorbis, whip, xacml, y2k, yaml.
 - **Humor:** 74 documents, 0 exclusivity violations.
-- **Stability replay:** 9,302 RFCs debut no tag, 525 debut one, 7 debut two, 1 debut three. The 8 multi-debut cases are parent-and-child pairs founding a branch, plus RFC 2430 preceding the MPLS architecture into print.
+- **Stability replay:** 9,220 RFCs debut no tag, 605 debut one, 9 debut two, 2 debut three. The 11 multi-debut cases are parent-and-child pairs founding a branch, plus RFC 2430 preceding the MPLS architecture into print.
 
 ### Served view
 
-- **Axes:** 461 technology tags, 75 topics.
-- **Zero-technology documents:** 1,440 — governance, process, humor, ARPANET-era notes, general-subject documents.
+- **Axes:** 548 technology tags, 75 topics.
+- **Zero-technology documents:** 1,421 — governance, process, humor, ARPANET-era notes, general-subject documents.
 - **Zero-topic documents:** 0.
-- **Per RFC:** technology mean 1.75, topic mean 2.00, combined mean 3.75.
-- **Over ten combined:** 44 documents (0.4%); maximum 16.
-- **Documents whose only topics are roots:** 5,350.
+- **Per RFC:** technology mean 1.79, topic mean 2.01, combined mean 3.80.
+- **Over ten combined:** 48 documents (0.5%); maximum 15.
+- **Documents whose only topics are roots:** 5,333.
 - **Topic replay:** 5 documents debut two topics, all in the founding years. Debuts since 2003: emergency-services (2003), nat-traversal (2003), iot (2006), energy-management (2013), autonomic-networking (2014), telemetry (2019), sustainability (2024).
