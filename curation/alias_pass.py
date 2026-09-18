@@ -542,12 +542,29 @@ def write_outputs(results, corpus, by_id, out_dir, min_hits, min_precision=20, p
             now = {(t, a) for t, v in list(kept.items()) for a, *_ in v}
             now |= {(t, a) for t, v in list(covers.items()) for a, *_ in v}
             prev = yaml.safe_load(open(previous)) or {}
-            gone = sorted(
+            gone = {
                 (t, a)
                 for t, v in prev.items()
                 for a in ((v.get("aliases") or []) + (v.get("covers") or []))
                 if (t, a) not in now
-            )
+            }
+            # The queue is sticky. Without this it is one-generation memory: a
+            # term dropped by pass 2 is listed once, then vanishes at pass 3
+            # because it is no longer in the aliases.yaml being differenced
+            # against. Carry the previous review.md's own list forward, minus
+            # anything since adopted, so an entry survives until someone acts.
+            carried = out_dir / "review.md"
+            if carried.exists():
+                keep_section = False
+                for line in carried.read_text().splitlines():
+                    if line.startswith("## Proposed by a previous pass"):
+                        keep_section = True; continue
+                    if keep_section and line.startswith("## "):
+                        break
+                    m = re.match(r"^- `([^`]+)` \*\*(.+?)\*\*", line)
+                    if keep_section and m and (m.group(1), m.group(2)) not in now:
+                        gone.add((m.group(1), m.group(2)))
+            gone = sorted(gone)
             f.write(f"\n## Proposed by a previous pass, not re-proposed -- {len(gone)}\n\n")
             f.write("A model pass is not deterministic, so a re-run explores a different\n")
             f.write("subset rather than reproducing the last one. These were proposed before\n")

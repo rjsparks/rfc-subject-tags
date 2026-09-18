@@ -177,3 +177,40 @@ covered term earns its own tag, it moves out.
 The distinction matters because merging them makes `aliases` mean two things at
 once and quietly defers the question of whether a covered technology deserves a
 tag. See R21 and R22 in `../README.md`.
+
+## promote_pass.py and apply_promotions.py
+
+The alias pass leaves two kinds of undecided term: `covers` entries — a
+technology a category tag stands in for — and terms an earlier pass proposed
+that a later one did not. Both are the same question deferred: *is this a
+technology of its own, or another name for the tag it sits under?*
+
+`promote_pass.py` answers it, one call per parent tag rather than per term,
+because whether SHA-256 is a child of `sha` or a name for it depends on what
+`sha` already covers and what children it already has.
+
+R10 says a technology with documents of its own deserves a tag, R13 permits
+single-document tags, and R11's evidence test is "does an RFC use the name as
+the name of the thing" — a title hit. But **counting cannot decide**. It
+promotes `IAB` (69 title hits), `IESG` and `IRTF`, which are organisations R14
+and R15 exclude; and it cannot separate a family member from a technology, since
+`SHA-256` and `ECDSA` score alike while one is a variant of `sha` and the other
+is a technology in its own right. The count is a prefilter; the pass is the
+decision. Over 260 candidates it promoted 88 and left 157 as aliases and 11
+dropped — where the count alone would have promoted 128.
+
+`apply_promotions.py` writes the result into `taxonomy.yaml`: new child tags
+after their parent's subtree, aliases appended, and `covers` removed from every
+entry. The field existed to hold terms whose status was undecided; once each has
+an outcome there is nothing left for it to carry.
+
+Two things the pass cannot see, both handled in `apply_promotions.py` and
+visible at the top of that file:
+
+- **A term proposed under two parents.** Batching by parent means no call sees
+  another's proposals; `MIKEY` came back as a tag under both `key-management`
+  and `srtp`, and `ARF` under both `email-authentication` and `spam`. The tree
+  allows one home each, chosen by what the thing is.
+- **A parent whose own `match` already claims the child.** Promoting `ECDSA`
+  means removing `\bECDSA\b` from `elliptic-curve`'s rule, or the parent keeps
+  claiming the child's documents.
