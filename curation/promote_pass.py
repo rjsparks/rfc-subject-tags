@@ -257,10 +257,19 @@ def ask_api(client, prompt, effort):
 
 # ------------------------------------------------------------------ outputs
 
-def write_outputs(results, by_id, out_dir):
+def write_outputs(results, by_id, out_dir, titles=None, min_hits=0):
     tags, aliases, drops = defaultdict(list), defaultdict(list), []
     for parent in sorted(results):
         for d in results[parent].get("decisions", []):
+            # Enforce the prefilter rather than merely showing it to the model.
+            # A term with too little title evidence cannot become a tag however
+            # well the model argued it, because R10's case for a tag rests on
+            # that evidence. It stays an alias instead.
+            if d["outcome"] == "tag" and titles is not None:
+                if title_hits(titles, d["term"]) < min_hits:
+                    d = dict(d, outcome="alias",
+                             reason=f"below the evidence threshold ({min_hits} title hits); "
+                                    f"kept as an alias. " + d["reason"])
             if d["outcome"] == "tag":
                 tags[parent].append(d)
             elif d["outcome"] == "alias":
@@ -330,7 +339,7 @@ def main():
                 r = json.loads(line); done[r["parent"]] = r
 
     if args.report:
-        a, b, c = write_outputs(done, by_id, out_dir)
+        a, b, c = write_outputs(done, by_id, out_dir, titles, args.min_hits)
         print(f"from {len(done)} parents: {a} tags, {b} aliases, {c} drops -> {out_dir/'promotions.yaml'}")
         return
 
@@ -379,7 +388,7 @@ def main():
             print(f"[{i}/{len(pending)}] {t}: {n} tag(s) of {len(data.get('decisions', []))}")
     fh.close()
 
-    a, b, c = write_outputs(done, by_id, out_dir)
+    a, b, c = write_outputs(done, by_id, out_dir, titles, args.min_hits)
     print(f"\n{a} tags, {b} aliases, {c} drops" + (f" | ~${spend:.2f} equivalent" if spend else ""))
     print(f"-> {out_dir/'promotions.yaml'}")
 

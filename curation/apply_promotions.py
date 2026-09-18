@@ -19,7 +19,7 @@ nothing left for it to carry.
 Writes through the dumper regen.py uses, so the diff shows only real changes and
 the next curator run reformats nothing.
 """
-import argparse, json, re, sys
+import argparse, json, os, re, sys
 from collections import defaultdict
 
 import yaml
@@ -74,6 +74,8 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--taxonomy", default="../taxonomy.yaml")
     p.add_argument("--decisions", default="promotions.jsonl")
+    p.add_argument("--corpus", default="../rfcs.json",
+                   help="used to verify each proposed tag actually matches something")
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
 
@@ -82,6 +84,7 @@ def main():
     entries = doc["tags"]
     by_id = {e["id"]: e for e in entries}
 
+    corpus = a.corpus if os.path.exists(a.corpus) else None
     promote, alias, drops = load_decisions(a.decisions)
     promote += EXTRA_TAGS
 
@@ -103,6 +106,32 @@ def main():
         else:
             seen[i] = d; kept.append(d)
     promote = kept
+
+    # A tag must carry documents: validation.md treats a zero-document tag as
+    # either mis-ruled or one that should not exist. Checked here rather than
+    # left for a human to notice, because the pass proposes the match rule and
+    # has no way to test it.
+    if corpus:
+        tk = [(r.get("title") or "") + " ; " + " ; ".join(r.get("keywords") or [])
+              for r in json.load(open(corpus))]
+        still = []
+        for d in promote:
+            try:
+                rx = re.compile(d["match"], re.I)
+            except re.error as e:
+                print(f"  demoted {d['term']}: bad regex ({e})", file=sys.stderr)
+                alias.append({"parent": d["parent"], "term": d["term"],
+                              "reason": f"proposed match rule did not compile: {e}"})
+                continue
+            if not any(rx.search(t) for t in tk):
+                print(f"  demoted {d['term']}: its match rule tags no document", file=sys.stderr)
+                alias.append({"parent": d["parent"], "term": d["term"],
+                              "reason": "proposed as a tag, but the proposed match rule tags no "
+                                        "document; a tag carrying nothing is mis-ruled or should "
+                                        "not exist"})
+                continue
+            still.append(d)
+        promote = still
 
     clash = sorted({d["id"] for d in promote} & set(by_id))
     if clash:
@@ -144,8 +173,8 @@ def main():
         if str(term).lower().replace(" ", "-") in ids:
             shadowed.append((d["parent"], term)); continue
         cur = parent.get("aliases") or []
-        if term in cur:
-            continue
+        if str(term).lower() in {str(x).lower() for x in cur}:
+            continue          # case-insensitive: the engine compares lowercased
         rebuilt = {}
         for k, v in parent.items():
             if k == "aliases":

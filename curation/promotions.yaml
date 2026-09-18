@@ -178,12 +178,6 @@ promote:
     desc: "YAML (YAML Ain't Markup Language), the application/yaml media type and its use as a serialisation and configuration format"
     match: "\\byaml\\b"
     reason: "tag case: YAML is a serialisation format in its own right, not a spelling, version or family member of the parent, and an RFC title takes it as its subject (1 title hit, the application/yaml media type registration); R13 allows a tag carried by a single document, and the sibling markdown rests on the same kind of media-type registration."
-  - parent: dns-privacy
-    id: doq
-    term: "DoQ"
-    desc: "DoQ (DNS over QUIC), DNS resolution carried over dedicated QUIC connections"
-    match: "\\bDoQ\\b|DNS[ -]over[ -](Dedicated[ -])?QUIC|QUIC[ -](Connections?[ -])?for[ -]DNS"
-    reason: "Distinct technology case: DoQ names DNS resolution carried over QUIC, a separate encrypted transport alongside its siblings doh, dot and oblivious-dns, and RFC 9250 takes it as its subject under its expanded name (\"DNS over Dedicated QUIC Connections\"). The zero count is for the literal abbreviation only -- R11's evidence is the title naming the thing, which it does in expanded form, so a document exists to carry the tag and it is not merely another name for encrypted DNS transport in general."
   - parent: e-commerce
     id: ecml
     term: "ECML"
@@ -636,6 +630,9 @@ alias:
   - parent: congestion-control
     term: "Vegas"
     reason: "Alias case: a delay-based algorithm RFCs mention in surveys and comparisons but never take as their subject -- 0 titles use the name, so no document would be filed under it."
+  - parent: dns-privacy
+    term: "DoQ"
+    reason: "below the evidence threshold (1 title hits); kept as an alias. Distinct technology case: DoQ names DNS resolution carried over QUIC, a separate encrypted transport alongside its siblings doh, dot and oblivious-dns, and RFC 9250 takes it as its subject under its expanded name (\"DNS over Dedicated QUIC Connections\"). The zero count is for the literal abbreviation only -- R11's evidence is the title naming the thing, which it does in expanded form, so a document exists to carry the tag and it is not merely another name for encrypted DNS transport in general."
   - parent: dvb
     term: "VBI"
     reason: "Alias, second case: the vertical blanking interval is a carrier the parent's broadcast documents refer to, but no RFC title names it, so nothing would be filed under a VBI tag; it also is not a thing in itself apart from the television signal it rides in. Kept as a search term on dvb."
